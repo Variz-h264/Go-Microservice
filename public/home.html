@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Gateway | TechTitanByte</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Kanit', sans-serif;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body id="app" v-cloak class="bg-dark">
+    <div class="container mt-5">
+        <div class="text-center text-white">
+            <h1><i class="fa fa-torii-gate text-danger"></i> {{ title }} <i class="fa fa-torii-gate text-danger"></i></h1>
+            <h4 class="text-white-50">{{ text }}</h4>
+            <p class="text-white-50">{{ text2 }}</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://kit.fontawesome.com/a59b4d3f29.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const { createApp, ref } = Vue
+        
+        createApp({
+            data() {
+                return {
+                    title: "Gateway s",
+                    text: "Tool Create By TechTitanByte",
+                    text2: "หากท่านต้องการใช้งาน Tool ตัวนี้ให้ติดต่อทีม => TechTitanByte!!"
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>

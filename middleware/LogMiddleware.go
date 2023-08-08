@@ -2,6 +2,9 @@ package middleware
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -16,13 +19,17 @@ type RequestInfo struct {
 	Method     string
 	RequestURI string
 	UserAgent  string
+	Region     string
 }
 
 func LogMiddleware(c *fiber.Ctx) error {
 	start := time.Now()
 
+	// Get the client IP using X-Real-IP or X-Forwarded-For header
+	ip := c.IP()
+
 	reqInfo := RequestInfo{
-		IP:         c.IP(),
+		IP:         ip,
 		Host:       c.Hostname(),
 		Method:     c.Method(),
 		RequestURI: c.Request().URI().String(),
@@ -31,6 +38,7 @@ func LogMiddleware(c *fiber.Ctx) error {
 
 	c.Locals("request_info", reqInfo)
 
+	// Call the next middleware or handler
 	err := c.Next()
 
 	statusText := http.StatusText(c.Response().StatusCode())
@@ -48,19 +56,47 @@ func LogMiddleware(c *fiber.Ctx) error {
 	fmt.Printf("%s %d %s\n", green("Response Status:"), c.Response().StatusCode(), statusText)
 	fmt.Printf("%s: %v\n", green("Response Time"), time.Since(start))
 
-	// ตรวจสอบ User-Agent ที่ส่งมาใน request header
-	isMobile := strings.Contains(reqInfo.UserAgent, "Mobile")
+	// Get the region based on IP
+	region, err := getRegionFromIP(reqInfo.IP)
+	if err != nil {
+		log.Println("Failed to get region from IP:", err)
+		region = "unknown"
+	}
+	reqInfo.Region = region
 
 	// แสดงผลเพิ่มเติมว่าใช้ PC หรือ Mobile
-	if isMobile {
+	if strings.Contains(reqInfo.UserAgent, "Mobile") {
 		fmt.Println("Device:", green("Mobile")) // แสดงผลเป็นสี Magenta
-		fmt.Printf("<================>\n\n")
-
 	} else {
 		fmt.Println("Device:", green("PC")) // แสดงผลเป็นสี Magenta
-		fmt.Printf("<================>\n\n")
-
 	}
+	fmt.Printf("Region: %s\n", strings.ToLower(reqInfo.Region))
+	fmt.Printf("<================>\n\n")
 
-	return err
+	return nil
+}
+
+func getRegionFromIP(ip string) (string, error) {
+	ips, err := net.LookupIP(ip)
+	if err != nil {
+		return "", err
+	}
+	for _, ip := range ips {
+		if ipv4 := ip.To4(); ipv4 != nil {
+			// Use a public GeoIP API to get region from the IP
+			resp, err := http.Get("https://ipapi.co/" + ipv4.String() + "/region")
+			if err != nil {
+				return "", err
+			}
+			defer resp.Body.Close()
+
+			buf := new(strings.Builder)
+			if _, err := io.Copy(buf, resp.Body); err != nil {
+				return "", err
+			}
+
+			return buf.String(), nil
+		}
+	}
+	return "", fmt.Errorf("No valid IPv4 address found")
 }
