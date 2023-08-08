@@ -25,12 +25,14 @@ func main() {
 
 	// middleware.Ready()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	app.Static("/", "./public/home.html")
 
-	// เพิ่ม Route สำหรับการเรียกข้อมูล User
-	app.Get("/users", service.GetUserHandler)
+	api := app.Group("/api") // /api
+	v1 := api.Group("/v1")   // /api/v1
+
+	// เพิ่ม Route
+	v1.Get("/users", service.GetUserHandler)
+	v1.Get("/key", service.ApiKeyHandler)
 
 	// สั่งให้เซิร์ฟเวอร์รันและจัดการข้อผิดพลาด
 	err := app.Listen(":8000")

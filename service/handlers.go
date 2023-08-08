@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/Variz-h264/Go-Microservice/core"
-	"github.com/Variz-h264/Go-Microservice/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -14,8 +13,6 @@ type User struct {
 func GetUserHandler(c *fiber.Ctx) error {
 	// สร้าง Response ใหม่
 	response := core.NewResponse()
-
-	middleware.FileExecutable("/handlers.go")
 
 	// ตั้งค่าข้อมูลใน Response
 	user := User{
